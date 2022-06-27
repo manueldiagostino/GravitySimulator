@@ -1,19 +1,18 @@
 package MovingPoint;
 
 import Vectors.Force2D;
-import Vectors.Vector;
 import Vectors.Vector2D;
 import Canvas.MyPanel;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.FocusListener;
 import java.util.Objects;
 
 // Abstract class that implements the concept of a Moving Point in the space
-public abstract class MovingPoint {
+public abstract class MovingPoint implements FocusListener {
     protected static MyPanel panel;
+    protected String name;
+    protected boolean focused;
 
     protected Vector2D position;
     protected Vector2D velocity;
@@ -34,6 +33,8 @@ public abstract class MovingPoint {
         this.movingTime = 0;
         this.mass = mass;
         this.isTrajectory = false;
+        this.name = "A";
+        this.focused = false;
     }
 
     public MovingPoint(MyPanel panel, Vector2D position, double mass) {
@@ -85,6 +86,14 @@ public abstract class MovingPoint {
     public abstract boolean contains(int x, int y);
     public abstract void edges(double left, double right, double bottom, double top);
     public abstract void draw(Graphics2D g);
+    public abstract void drawName(Graphics2D g);
+    public boolean isFocused() {
+        return focused;
+    }
+
+    public void setFocused(boolean b) {
+        this.focused = b;
+    }
 
     @Override
     public boolean equals(Object o) {

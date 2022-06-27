@@ -25,6 +25,18 @@ public class MyMouseHandler implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseClicked(MouseEvent mouseEvent) {
+        x = mouseEvent.getX();
+        y = mouseEvent.getY();
+
+        for (MovingPoint mp : panel.getElements())
+            if (mp.contains(x,y)) {
+                mp.setFocused(true);
+                panel.requestFocus();
+            }
+            else
+                mp.setFocused(false);
+        panel.requestFocus();
+        panel.repaint();
     }
 
     @Override
@@ -33,7 +45,16 @@ public class MyMouseHandler implements MouseListener, MouseMotionListener {
         x = mouseEvent.getX();
         y = mouseEvent.getY();
 
-        System.out.println(x + ", " + y);
+        for (MovingPoint mp : panel.getElements())
+            if (mp.contains(x,y)) {
+                mp.setFocused(true);
+                panel.requestFocus();
+            }
+            else
+                mp.setFocused(false);
+
+        panel.requestFocus();
+//        System.out.println(x + ", " + y);
     }
 
     @Override
@@ -44,7 +65,7 @@ public class MyMouseHandler implements MouseListener, MouseMotionListener {
         for (MovingPoint mp : panel.getElements())
             if (mp.contains(x,y)) {
                 mp.isTrajectory = true;
-                mp.velTrajectory = new Vector2D(-5*dx, -5*dy);
+                mp.velTrajectory = new Vector2D(-7*dx, -7*dy);
                 panel.repaint();
             }
     }
@@ -54,10 +75,10 @@ public class MyMouseHandler implements MouseListener, MouseMotionListener {
         for (MovingPoint mp : panel.getElements())
             if (mp.contains(x,y)) {
                 mp.isTrajectory = false;
-                mp.setVelocity(new Vector2D(-5*dx, -5*dy));
+                mp.setVelocity(new Vector2D(-7*dx, -7*dy));
             }
 
-        panel.getTimer().start();
+//        panel.getTimer().start();
     }
 
     @Override

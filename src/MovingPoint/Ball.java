@@ -3,12 +3,12 @@ package MovingPoint;
 import Shapes.Arrow;
 import Vectors.Vector2D;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.awt.event.FocusEvent;
 import java.awt.geom.Ellipse2D;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.geom.Point2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -16,7 +16,7 @@ import java.util.Objects;
 import Canvas.MyPanel;
 
 public class Ball extends MovingPoint {
-    private Color color;
+    private final Color color;
     private BufferedImage icon;
     private int width;
 
@@ -72,6 +72,25 @@ public class Ball extends MovingPoint {
         }
     }
 
+    public void setName(String s) {
+        this.name = s;
+    }
+
+    @Override
+    public void drawName(Graphics2D g) {
+        Font f = new Font("Comic Sans MS", Font.BOLD, 15);
+        g.setFont(f);
+        FontMetrics fm = g.getFontMetrics();
+        Rectangle2D.Double background = new Rectangle2D.Double(position.getXMag()-fm.stringWidth(name)-5, position.getYMag()-fm.getHeight()-5,
+                fm.stringWidth(name), fm.getHeight());
+        g.setColor(Color.black);
+        g.fill(background);
+
+        g.setColor(Color.white);
+        g.drawString(name, (int) (background.getX()), (int) (background.getY() + (background.getHeight()-fm.getHeight())/2 + fm.getAscent()));
+
+    }
+
     @Override
     public void draw(Graphics2D g) {
         if (icon == null) {
@@ -82,6 +101,8 @@ public class Ball extends MovingPoint {
         else {
             g.drawImage(icon, (int)position.getXMag(), (int)position.getYMag(), width, width, null);
         }
+
+//        drawName(g);
     }
 
     @Override
@@ -128,5 +149,15 @@ public class Ball extends MovingPoint {
 
     public double getWidth() {
         return width;
+    }
+
+    @Override
+    public void focusGained(FocusEvent focusEvent) {
+        focused = true;
+    }
+
+    @Override
+    public void focusLost(FocusEvent focusEvent) {
+        focused = false;
     }
 }
