@@ -20,7 +20,7 @@ public class MyPanel extends JPanel implements ActionListener {
     private final Timer timer;
     private final HashSet<MovingPoint> elements;
     private final MyMouseHandler mh;
-    private final ControlsPanel cp;
+    public final ControlsPanel cp;
 
     // Time in milliseconds between two repaint()
     private static final int delta = 16;
@@ -37,12 +37,13 @@ public class MyPanel extends JPanel implements ActionListener {
 
 
     private void initKeyBindings() {
+        // Set pause action
         this.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "pause");
         this.getActionMap().put("pause", new pauseAction());
 
-        AbstractAction update = cp.getUpdateAction();
+        // Update info labels
         this.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "update");
-        this.getActionMap().put("update", update);
+        this.getActionMap().put("update", cp.getUpdateAction());
     }
 
     public MyPanel(int width, int height) {
@@ -60,8 +61,9 @@ public class MyPanel extends JPanel implements ActionListener {
 
         this.totalAcceleration = gravityAcc;
         Ball b1 = new Ball(this, new Vector2D(200,height-20), new Vector2D(0,0),5);
+        b1.setName("A");
         Ball b2 = new Ball(this, new Vector2D(400,height-20), new Vector2D(0,0),5);
-        b2.setName("Daniel");
+        b2.setName("B");
         this.elements.add(b1);
         this.elements.add(b2);
 
@@ -79,8 +81,15 @@ public class MyPanel extends JPanel implements ActionListener {
         c.anchor = GridBagConstraints.FIRST_LINE_START;
 
         this.cp = new ControlsPanel(this, rows);
-        this.cp.getInfo()[0][1].setText(""+totalAcceleration.getXMag()/pxPerMeter);
-        this.cp.getInfo()[0][2].setText(""+totalAcceleration.getYMag()/pxPerMeter);
+
+        // Select the first element to be focused
+        // and initialize the info panel
+        for (MovingPoint mp : elements) {
+            mp.setFocused(true);
+            this.cp.initInfo(mp);
+            break;
+        }
+
         this.add(cp, c);
 
         this.initKeyBindings();
@@ -98,7 +107,6 @@ public class MyPanel extends JPanel implements ActionListener {
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
-        cp.repaint();
         Graphics2D g2d = (Graphics2D) g;
 
         RenderingHints rh = new RenderingHints(
@@ -109,6 +117,7 @@ public class MyPanel extends JPanel implements ActionListener {
             g2d.drawImage(background, 0, 0, null);
         }
 
+        boolean noOneFocused = true;
         for (MovingPoint mp : elements) {
             mp.draw(g2d);
 
@@ -117,12 +126,19 @@ public class MyPanel extends JPanel implements ActionListener {
                 mp.drawTrajectory(g2d);
             }
 
-            if (mp.isFocused())
+            if (mp.isFocused()) {
+                noOneFocused = false;
                 mp.drawName(g2d);
+                cp.initInfo(mp);
+            }
         }
 
+        if (noOneFocused)
+            cp.infoBlank();
+
+        cp.repaint();
+
         Toolkit.getDefaultToolkit().sync();
-        g.dispose();
     }
 
     public Timer getTimer() {
