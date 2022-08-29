@@ -5,14 +5,23 @@ public class Number {
         if (s==null || s.equals(""))
             throw new RuntimeException("Main.parseDouble: Empty string");
 
+        int sign = 1;
         double res = 0.0;
 
-        int i;
+        int i = 0;
         char[] arr = s.toCharArray();
-        for (i = 0; i < s.length() && arr[i]!=',' && arr[i]!='.'; i++) {
+        if (arr[0] == '-') {
+            i++;
+            sign = -1;
+        }
+
+        for (; i < s.length() && arr[i]!=',' && arr[i]!='.'; i++) {
             if (Character.isDigit(arr[i]))
                 res = res*10 + ((int)(arr[i]) - '0');
         }
+
+        if (i == s.length())
+            return res*sign;
 
         if (arr[i]==',' || arr[i]=='.')
             i++;
@@ -27,6 +36,6 @@ public class Number {
             }
         }
 
-        return res;
+        return res*sign;
     }
 }

@@ -2,7 +2,7 @@ package Vectors;
 
 import java.util.Objects;
 
-public class Vector {
+public class Vector implements Cloneable {
     protected double magnitude;
     protected double direction;
 
@@ -31,5 +31,10 @@ public class Vector {
     @Override
     public int hashCode() {
         return Objects.hash(magnitude);
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return new Vector(this.magnitude, this.direction);
     }
 }

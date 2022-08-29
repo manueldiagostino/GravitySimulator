@@ -27,7 +27,7 @@ public class MyPanel extends JPanel implements ActionListener {
     // How many pixels for a real meter
     public static final int pxPerMeter = 100;
 
-    private static final Vector2D gravityAcc = new Vector2D(0, 9.81*pxPerMeter);
+    public static final Vector2D gravityAcc = new Vector2D(0, 9.81*pxPerMeter);
 
     public void setTotalAcceleration(Vector2D totalAcceleration) {
         this.totalAcceleration = totalAcceleration;
@@ -59,13 +59,16 @@ public class MyPanel extends JPanel implements ActionListener {
         this.elements = new HashSet<>();
         this.mh = new MyMouseHandler(this);
 
-        this.totalAcceleration = gravityAcc;
-        Ball b1 = new Ball(this, new Vector2D(200,height-20), new Vector2D(0,0),5);
+        this.totalAcceleration = MyPanel.gravityAcc;
+        Ball b1 = new Ball(this, new Vector2D(200,height-100), new Vector2D(0,0),5);
         b1.setName("A");
         Ball b2 = new Ball(this, new Vector2D(400,height-20), new Vector2D(0,0),5);
         b2.setName("B");
+        Ball b3 = new Ball(this, new Vector2D(600,height-300), new Vector2D(0,0),5);
+        b2.setName("prova");
         this.elements.add(b1);
         this.elements.add(b2);
+        this.elements.add(b3);
 
         // Adding cursors panel
         int rows = 4;
@@ -150,6 +153,17 @@ public class MyPanel extends JPanel implements ActionListener {
         for (MovingPoint p : elements) {
             p.move(totalAcceleration, (double)delta/1000);
             p.edges(0, width, height, -10000);
+
+            boolean b;
+            for (MovingPoint q : elements) {
+                b = p.detectBump(q);
+
+                if (p != q && b && !(p.bumped && q.bumped)) {
+                    p.bump(q);
+                }
+                else if (!b)
+                    p.bumped = false;
+            }
         }
         repaint();
     }

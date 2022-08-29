@@ -1,6 +1,7 @@
 package MovingPoint;
 
 import Shapes.Arrow;
+import Vectors.Vector;
 import Vectors.Vector2D;
 import java.awt.*;
 import java.awt.event.FocusEvent;
@@ -18,12 +19,12 @@ import Canvas.MyPanel;
 public class Ball extends MovingPoint {
     private final Color color;
     private BufferedImage icon;
-    private int width;
+    private int diameter;
 
     public Ball(MyPanel panel, Vector2D position, Vector2D velocity,
-                double mass, int width, Color color) {
+                double mass, int diameter, Color color) {
         super(panel, position, velocity, mass);
-        this.width = width;
+        this.diameter = diameter;
         this.color = color;
         this.icon = null;
     }
@@ -39,13 +40,13 @@ public class Ball extends MovingPoint {
             return;
         }
 
-        this.width = 20;
+        this.diameter = 20;
     }
 
     @Override
     public boolean contains(int x, int y) {
-        return x >= position.getXMag() && x <= position.getXMag() + width &&
-                y >= position.getYMag() && y <= position.getYMag() + width;
+        return x >= position.getXMag() && x <= position.getXMag() + diameter &&
+                y >= position.getYMag() && y <= position.getYMag() + diameter;
     }
 
     @Override
@@ -53,20 +54,20 @@ public class Ball extends MovingPoint {
         double x = position.getXMag();
         double y = position.getYMag();
 
-        if (x < left || x > right-width) {
+        if (x < left || x > right-diameter) {
             if (x <= left)
                 position.setMagnitudes(left, y);
             else
-                position.setMagnitudes(right - width, position.getYMag());
+                position.setMagnitudes(right - diameter, position.getYMag());
 
             velocity.setMagnitudes((double)-3/5*velocity.getXMag(), velocity.getYMag());
         }
 
-        if (y<top || y+width > bottom) {
+        if (y<top || y+diameter > bottom) {
             if (y <= top)
                 position.setMagnitudes(position.getXMag(), top);
             else
-                position.setMagnitudes(position.getXMag(), bottom - width);
+                position.setMagnitudes(position.getXMag(), bottom - diameter);
 
             velocity.setMagnitudes(velocity.getXMag(),(double)-3/5*velocity.getYMag());
         }
@@ -94,12 +95,12 @@ public class Ball extends MovingPoint {
     @Override
     public void draw(Graphics2D g) {
         if (icon == null) {
-            Ellipse2D.Double point = new Ellipse2D.Double(position.getXMag(), position.getYMag(), width, width);
+            Ellipse2D.Double point = new Ellipse2D.Double(position.getXMag(), position.getYMag(), diameter, diameter);
             g.setColor(color);
             g.fill(point);
         }
         else {
-            g.drawImage(icon, (int)position.getXMag(), (int)position.getYMag(), width, width, null);
+            g.drawImage(icon, (int)position.getXMag(), (int)position.getYMag(), diameter, diameter, null);
         }
 
 //        drawName(g);
@@ -107,8 +108,8 @@ public class Ball extends MovingPoint {
 
     @Override
     public void drawVelTrajectory(Graphics2D g, Color c) {
-        Arrow.draw(g, new Point2D.Double(position.getXMag()+(double) width/2, position.getYMag()+(double) width/2),
-                new Point2D.Double(position.getXMag()+(double) width/2+(velTrajectory.getXMag()/2),position.getYMag()+(double) width/2+(velTrajectory.getYMag()/2)),
+        Arrow.draw(g, new Point2D.Double(position.getXMag()+(double) diameter/2, position.getYMag()+(double) diameter/2),
+                new Point2D.Double(position.getXMag()+(double) diameter/2+(velTrajectory.getXMag()/2),position.getYMag()+(double) diameter/2+(velTrajectory.getYMag()/2)),
                 new BasicStroke(2f), new BasicStroke(10f), 20, Color.red);
     }
 
@@ -116,7 +117,7 @@ public class Ball extends MovingPoint {
     public void drawTrajectory(Graphics2D g) {
         g.setColor(Color.lightGray);
 
-        Ball T = new Ball(panel, new Vector2D(position.getXMag()+(double)width/2, position.getYMag()+(double)width/2), velTrajectory, 1, 4, Color.white);
+        Ball T = new Ball(panel, new Vector2D(position.getXMag()+(double)diameter/2, position.getYMag()+(double)diameter/2), velTrajectory, 1, 4, Color.white);
         Ellipse2D.Double point = new Ellipse2D.Double(T.position.getXMag(), T.position.getYMag(), 4, 4);
         Vector2D acc = panel.getTotalAcceleration();
 
@@ -138,17 +139,17 @@ public class Ball extends MovingPoint {
         if (!super.equals(o)) return false;
         Ball ball = (Ball) o;
         return super.equals(ball) &&
-                this.width == ball.width &&
+                this.diameter == ball.diameter &&
                 this.color.equals(ball.color);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), width, color);
+        return Objects.hash(super.hashCode(), diameter, color);
     }
 
     public double getWidth() {
-        return width;
+        return diameter;
     }
 
     @Override
@@ -159,5 +160,57 @@ public class Ball extends MovingPoint {
     @Override
     public void focusLost(FocusEvent focusEvent) {
         focused = false;
+    }
+    @Override
+    public boolean detectBump(MovingPoint o) {
+        if (o==null || this.equals(o))
+            return false;
+        else if (!(o instanceof Ball))
+            return false;
+
+        Ball other = (Ball)o;
+        Vector2D center1 = new Vector2D(this.getPosition().getXMag()+(double)this.diameter/2, this.getPosition().getYMag()+(double)this.diameter/2);
+        Vector2D center2 = new Vector2D(other.getPosition().getXMag()+(double)other.diameter/2, other.getPosition().getYMag()+(double) other.diameter/2);
+
+        Vector2D distance = center1.minus(center2);
+        return distance.getMagnitude() <= (double)this.diameter/2 + (double)other.diameter/2;
+    }
+    @Override
+    public void bump(MovingPoint o) {
+        if (o==null || this.equals(o))
+            return;
+        else if (!(o instanceof Ball))
+            return;
+
+        Ball other = (Ball)o;
+
+        double a,b;
+        a = (this.mass - other.mass)/(this.mass + other.mass);
+        b = (2*other.mass)/(this.mass + other.mass);
+
+        Vector2D thisFinalVel = (Vector2D) this.velocity.clone();
+        thisFinalVel = thisFinalVel.dotProduct(a);
+        thisFinalVel = thisFinalVel.plus(other.velocity.dotProduct(b));
+
+        System.out.println(this.velocity);
+        System.out.println(thisFinalVel);
+
+        a = (2*this.mass)/(this.mass + other.mass);
+        b = (other.mass - this.mass)/(this.mass + other.mass);
+
+        Vector2D otherFinalVel = (Vector2D) this.velocity.clone();
+        otherFinalVel = otherFinalVel.dotProduct(a);
+        otherFinalVel = otherFinalVel.plus(other.velocity.dotProduct(b));
+
+        this.setVelocity(thisFinalVel);
+        other.setVelocity(otherFinalVel);
+        this.bumped = other.bumped = true;
+    }
+
+    public static void main(String[] args) {
+        Ball b1 = new Ball(null, new Vector2D(40,40), new Vector2D(0,0),5);
+        Ball b2 = new Ball(null, new Vector2D(60,20), new Vector2D(0,0),5);
+
+        System.out.println(b1.detectBump(b2));
     }
 }

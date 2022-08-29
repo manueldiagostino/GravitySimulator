@@ -22,7 +22,7 @@ public abstract class MovingPoint implements FocusListener {
 
     public boolean isTrajectory;
     public Vector2D velTrajectory;
-
+    public boolean bumped;
     public MovingPoint(MyPanel panel, Vector2D position, Vector2D velocity,
                        double mass) {
         MovingPoint.panel = panel;
@@ -35,6 +35,7 @@ public abstract class MovingPoint implements FocusListener {
         this.isTrajectory = false;
         this.name = "A";
         this.focused = false;
+        this.bumped = false;
     }
 
     public MovingPoint(MyPanel panel, Vector2D position, double mass) {
@@ -84,6 +85,9 @@ public abstract class MovingPoint implements FocusListener {
     public abstract void drawVelTrajectory(Graphics2D g, Color c);
     public abstract void drawTrajectory(Graphics2D g);
     public abstract boolean contains(int x, int y);
+    public abstract boolean detectBump(MovingPoint other);
+
+    public abstract void bump(MovingPoint other);
     public abstract void edges(double left, double right, double bottom, double top);
     public abstract void draw(Graphics2D g);
     public abstract void drawName(Graphics2D g);

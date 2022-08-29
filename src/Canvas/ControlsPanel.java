@@ -131,7 +131,7 @@ public class ControlsPanel extends JPanel {
         String xNum = info[0][1].getText();
         String yNum = info[0][2].getText();
 
-        if (xNum==null && yNum==null && xNum.equals("") && yNum.equals("")) {
+        if ((xNum==null && yNum==null) || (xNum.equals("") && yNum.equals(""))) {
             panel.setTotalAcceleration(new Vector2D(0,0));
             return;
         }
@@ -140,11 +140,12 @@ public class ControlsPanel extends JPanel {
 
         // Total acceleration
         try {
-            x = Double.parseDouble(xNum)*MyPanel.pxPerMeter;
-            y = Double.parseDouble(yNum)*MyPanel.pxPerMeter;
+            x = Number.parseDouble(xNum)*MyPanel.pxPerMeter;
+            y = Number.parseDouble(yNum)*MyPanel.pxPerMeter;
             panel.setTotalAcceleration(new Vector2D(x,y));
-        } catch (NumberFormatException e) {
-            panel.setTotalAcceleration(new Vector2D(0,0));
+        } catch (RuntimeException e) {
+            System.out.println("111");
+            panel.setTotalAcceleration(MyPanel.gravityAcc);
         }
 
         HashSet<MovingPoint> elements = panel.getElements();
@@ -159,7 +160,7 @@ public class ControlsPanel extends JPanel {
                     x = Number.parseDouble(xNum)*MyPanel.pxPerMeter;
                     y = Number.parseDouble(yNum)*MyPanel.pxPerMeter;
 
-                    System.out.println(x + ", " + y);
+                    System.out.println("pos: " + x + ", " + y);
                     mp.getPosition().setMagnitudes(x,y);
                 } catch (RuntimeException e) {
                     mp.getPosition().setMagnitudes(0.0,0.0);
@@ -172,6 +173,8 @@ public class ControlsPanel extends JPanel {
                 try {
                     x = Number.parseDouble(xNum)*MyPanel.pxPerMeter;
                     y = Number.parseDouble(yNum)*MyPanel.pxPerMeter;
+
+                    System.out.println("vel: " + x + ", " + y);
                     mp.getVelocity().setMagnitudes(x,y);
                 } catch (RuntimeException e) {
                     mp.getVelocity().setMagnitudes(0.0,0.0);
@@ -184,12 +187,18 @@ public class ControlsPanel extends JPanel {
                 try {
                     x = Number.parseDouble(xNum)*MyPanel.pxPerMeter;
                     y = Number.parseDouble(yNum)*MyPanel.pxPerMeter;
+
+                    System.out.println("acc: " + x + ", " + y + "\n");
                     mp.getAcceleration().setMagnitudes(x,y);
                 } catch (RuntimeException e) {
                     mp.getAcceleration().setMagnitudes(0.0,0.0);
                 }
 
-                mass[1].setText(String.format("%.2f", mp.getMass()));
+                // Mass
+                String m = mass[1].getText();
+                double newMass = Number.parseDouble(m);
+                mp.setMass(newMass);
+                mass[1].setText(String.format("%.2f", newMass));
             }
         }
     }
