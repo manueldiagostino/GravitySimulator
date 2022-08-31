@@ -1,13 +1,11 @@
 package MovingPoint;
 
 import Shapes.Arrow;
-import Vectors.Vector;
 import Vectors.Vector2D;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.geom.Ellipse2D;
 import javax.imageio.ImageIO;
-import javax.swing.*;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -36,7 +34,7 @@ public class Ball extends MovingPoint {
         try {
             this.icon = ImageIO.read(new File("/home/manuel/IdeaProjects/GravitySimulator/images/ball_40x40.png"));
         } catch (IOException e) {
-            System.err.println("Error in loading ball's image");
+            System.err.println("Error in loading ball'`s` image");
             return;
         }
 
@@ -83,13 +81,12 @@ public class Ball extends MovingPoint {
         g.setFont(f);
         FontMetrics fm = g.getFontMetrics();
         Rectangle2D.Double background = new Rectangle2D.Double(position.getXMag()-fm.stringWidth(name)-5, position.getYMag()-fm.getHeight()-5,
-                fm.stringWidth(name), fm.getHeight());
+                fm.stringWidth(this.name), fm.getHeight());
         g.setColor(Color.black);
         g.fill(background);
 
         g.setColor(Color.white);
-        g.drawString(name, (int) (background.getX()), (int) (background.getY() + (background.getHeight()-fm.getHeight())/2 + fm.getAscent()));
-
+        g.drawString(this.name, (int) (background.getX()), (int) (background.getY() + (background.getHeight()-fm.getHeight())/2 + fm.getAscent()));
     }
 
     @Override
@@ -204,7 +201,9 @@ public class Ball extends MovingPoint {
 
         this.setVelocity(thisFinalVel);
         other.setVelocity(otherFinalVel);
-        this.bumped = other.bumped = true;
+
+        this.move(panel.getTotalAcceleration(), (double) MyPanel.delta /1000);
+        other.move(panel.getTotalAcceleration(), (double) MyPanel.delta /1000);
     }
 
     public static void main(String[] args) {

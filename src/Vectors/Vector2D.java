@@ -41,12 +41,10 @@ public class Vector2D implements Cloneable {
     }
 
     public Vector2D oppose() {
-        Vector2D res = new Vector2D(-this.x.magnitude, -this.y.magnitude);
-        return res;
+        return new Vector2D(-this.x.magnitude, -this.y.magnitude);
     }
     public Vector2D plus(Vector2D other) {
-        Vector2D res = new Vector2D(this.x.magnitude+other.x.magnitude, this.y.magnitude+other.y.magnitude);
-        return res;
+        return new Vector2D(this.x.magnitude+other.x.magnitude, this.y.magnitude+other.y.magnitude);
     }
 
     public Vector2D minus(Vector2D other) {
@@ -54,8 +52,7 @@ public class Vector2D implements Cloneable {
     }
 
     public Vector2D dotProduct(double d) {
-        Vector2D res = new Vector2D(this.x.magnitude*d, this.y.magnitude*d);
-        return res;
+        return new Vector2D(this.x.magnitude*d, this.y.magnitude*d);
     }
 
     @Override

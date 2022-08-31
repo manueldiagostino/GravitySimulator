@@ -23,7 +23,7 @@ public class MyPanel extends JPanel implements ActionListener {
     public final ControlsPanel cp;
 
     // Time in milliseconds between two repaint()
-    private static final int delta = 16;
+    public static final int delta = 16;
     // How many pixels for a real meter
     public static final int pxPerMeter = 100;
 
@@ -40,6 +40,10 @@ public class MyPanel extends JPanel implements ActionListener {
         // Set pause action
         this.getInputMap().put(KeyStroke.getKeyStroke("SPACE"), "pause");
         this.getActionMap().put("pause", new pauseAction());
+
+        // Set reset action
+        this.getInputMap().put(KeyStroke.getKeyStroke("R"), "reset");
+        this.getActionMap().put("reset", new resetAction());
 
         // Update info labels
         this.getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "update");
@@ -60,15 +64,19 @@ public class MyPanel extends JPanel implements ActionListener {
         this.mh = new MyMouseHandler(this);
 
         this.totalAcceleration = MyPanel.gravityAcc;
-        Ball b1 = new Ball(this, new Vector2D(200,height-100), new Vector2D(0,0),5);
-        b1.setName("A");
-        Ball b2 = new Ball(this, new Vector2D(400,height-20), new Vector2D(0,0),5);
-        b2.setName("B");
-        Ball b3 = new Ball(this, new Vector2D(600,height-300), new Vector2D(0,0),5);
-        b2.setName("prova");
+        Ball b1 = new Ball(this, new Vector2D(200,height-90), new Vector2D(0,0),1);
+        b1.setName("B");
+        Ball b2 = new Ball(this, new Vector2D(400,height-90), new Vector2D(0,0),5);
+        b2.setName("C");
+        Ball b3 = new Ball(this, new Vector2D(300,height-90), new Vector2D(0,0),2);
+        b3.setName("D");
+        Ball b4 = new Ball(this, new Vector2D(500,height-90), new Vector2D(0,0),2);
+        b4.setName("E");
+
         this.elements.add(b1);
         this.elements.add(b2);
         this.elements.add(b3);
+        this.elements.add(b4);
 
         // Adding cursors panel
         int rows = 4;
@@ -154,15 +162,12 @@ public class MyPanel extends JPanel implements ActionListener {
             p.move(totalAcceleration, (double)delta/1000);
             p.edges(0, width, height, -10000);
 
-            boolean b;
+            boolean b = false;
             for (MovingPoint q : elements) {
                 b = p.detectBump(q);
 
-                if (p != q && b && !(p.bumped && q.bumped)) {
+                if (p != q && b)
                     p.bump(q);
-                }
-                else if (!b)
-                    p.bumped = false;
             }
         }
         repaint();
@@ -175,10 +180,29 @@ public class MyPanel extends JPanel implements ActionListener {
             timer.start();
     }
 
+    public void reset() {
+        timer.stop();
+        double x = 100, y = height-100;
+
+        for (MovingPoint p : elements) {
+            p.getVelocity().setMagnitudes(0.0,0.0);
+            p.getPosition().setMagnitudes(x,y);
+            x=x+30;
+        }
+        repaint();
+    }
+
     public class pauseAction extends AbstractAction {
         @Override
         public void actionPerformed(ActionEvent e) {
             pause();
+        }
+    }
+
+    public class resetAction extends AbstractAction {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            reset();
         }
     }
 
