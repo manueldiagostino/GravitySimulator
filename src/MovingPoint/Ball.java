@@ -189,9 +189,6 @@ public class Ball extends MovingPoint {
         thisFinalVel = thisFinalVel.dotProduct(a);
         thisFinalVel = thisFinalVel.plus(other.velocity.dotProduct(b));
 
-        System.out.println(this.velocity);
-        System.out.println(thisFinalVel);
-
         a = (2*this.mass)/(this.mass + other.mass);
         b = (other.mass - this.mass)/(this.mass + other.mass);
 
@@ -201,6 +198,15 @@ public class Ball extends MovingPoint {
 
         this.setVelocity(thisFinalVel);
         other.setVelocity(otherFinalVel);
+
+        if (Math.abs(this.velocity.getXMag()) > 1) // > 1 px/s
+            this.resetTimeLimitX();
+        if (Math.abs(this.velocity.getYMag()) > 1)
+            this.resetTimeLimitY();
+        if (Math.abs(other.velocity.getXMag()) > 1)
+            other.resetTimeLimitX();
+        if (Math.abs(other.velocity.getYMag()) > 1)
+            other.resetTimeLimitY();
 
         this.move(panel.getTotalAcceleration(), (double) MyPanel.delta /1000);
         other.move(panel.getTotalAcceleration(), (double) MyPanel.delta /1000);

@@ -3,9 +3,9 @@ package MovingPoint;
 import Vectors.Force2D;
 import Vectors.Vector2D;
 import Canvas.MyPanel;
-import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusListener;
+import java.util.LinkedList;
 import java.util.Objects;
 
 // Abstract class that implements the concept of a Moving Point in the space
@@ -22,6 +22,18 @@ public abstract class MovingPoint implements FocusListener {
 
     public boolean isTrajectory;
     public Vector2D velTrajectory;
+
+    public LinkedList<Vector2D> lastPos;
+    public double lastPosAveragex;
+    public double lastPosAveragey;
+    public LinkedList<Vector2D> lastVel;
+    public double lastVelAveragex;
+    public double lastVelAveragey;
+    public int count;
+    public int timeLimitToStopx;
+    public int timeLimitToStopy;
+    private static final int timeStop = 400;
+
     public MovingPoint(MyPanel panel, Vector2D position, Vector2D velocity,
                        double mass) {
         MovingPoint.panel = panel;
@@ -34,6 +46,16 @@ public abstract class MovingPoint implements FocusListener {
         this.isTrajectory = false;
         this.name = "A";
         this.focused = false;
+
+        this.lastPos = new LinkedList<>();
+        this.lastPosAveragex = 0.0;
+        this.lastPosAveragey = 0.0;
+        this.lastVel = new LinkedList<>();
+        this.lastVelAveragex = 0.0;
+        this.lastVelAveragey = 0.0;
+        this.count = 0;
+        this.timeLimitToStopx = 0;
+        this.timeLimitToStopy = 0;
     }
 
     public MovingPoint(MyPanel panel, Vector2D position, double mass) {
@@ -60,8 +82,69 @@ public abstract class MovingPoint implements FocusListener {
         movingTime += deltaTime;
     }
 
+    public void resetTimeLimit() {
+        timeLimitToStopx = 0;
+        timeLimitToStopy = 0;
+        count = 0;
+        lastPos.clear();
+        lastVel.clear();
+        lastPosAveragex = lastPosAveragey = lastVelAveragex = lastVelAveragey = 0.0;
+    }
+    public void resetTimeLimitX() {
+        timeLimitToStopx = 0;
+        count = 0;
+        lastPos.clear();
+        lastVel.clear();
+        lastPosAveragex = lastVelAveragex = 0.0;
+    }
+    public void resetTimeLimitY() {
+        timeLimitToStopy = 0;
+        count = 0;
+        lastPos.clear();
+        lastVel.clear();
+        lastPosAveragey = lastVelAveragey = 0.0;
+    }
+
+    /*
+    * Move the object with given acceleration of a deltaTime amount of time (in seconds).
+    * It also checks
+    * */
     public void move(Vector2D acceleration, double deltaTime) {
+        if (timeLimitToStopx >= timeStop && timeLimitToStopy >= timeStop) {
+            this.getVelocity().setMagnitudes(0.0,0.0);
+            return;
+        }
+
         this.acceleration = acceleration;
+
+        double resx = 0.0;
+        double resy = 0.0;
+        if (count == 4) {
+
+            for (int i = 0; i < 4; i++) {
+                resx += lastPos.get(i).getXMag();
+                resy += lastPos.get(i).getYMag();
+            }
+
+            lastPosAveragex = resx/4;
+            lastPosAveragey = resy/4;
+
+            resx = 0.0;
+            resy = 0.0;
+            for (int i = 0; i < 4; i++) {
+                resx += lastVel.get(i).getXMag();
+                resy += lastVel.get(i).getYMag();
+            }
+            lastVelAveragex = resx/4;
+            lastVelAveragey = resy/4;
+
+            count = 0;
+        }
+
+        if (lastPos.size() >= 5) {
+            lastPos.removeLast();
+            lastVel.removeLast();
+        }
 
         // Position
         double x = position.getXMag() +
@@ -70,14 +153,56 @@ public abstract class MovingPoint implements FocusListener {
         double y = position.getYMag() +
                 velocity.getYMag() * deltaTime +
                 (acceleration.getYMag() * deltaTime * deltaTime)/2;
-        position.setMagnitudes(x,y);
+        if (timeLimitToStopx < timeStop)
+            position.setXMag(x);
+        if (timeLimitToStopy < timeStop)
+            position.setYMag(y);
 
         // Velocity
         x = velocity.getXMag() + acceleration.getXMag() * deltaTime;
         y = velocity.getYMag() + acceleration.getYMag() * deltaTime;
-        velocity.setMagnitudes(x,y);
+        if (timeLimitToStopx < timeStop)
+            velocity.setXMag(x);
+        else
+            velocity.setXMag(0.0);
 
+        if (timeLimitToStopy < timeStop)
+            velocity.setYMag(y);
+        else
+            velocity.setYMag(0.0);
+
+        if (lastPos.isEmpty() && lastVel.isEmpty()) {
+            lastPos.add(this.position);
+            lastVel.add(this.velocity);
+        }
+        else if (lastPos.size() < 4) {
+            lastPos.addFirst(this.position);
+            lastVel.addFirst(this.velocity);
+        }
+
+        count++;
         movingTime += deltaTime;
+
+        double posx = this.position.getXMag();
+        double posy = this.position.getYMag();
+        double velx = this.velocity.getXMag();
+        double vely = this.velocity.getYMag();
+
+        if (Math.abs(posx-lastPosAveragex)<=0.2 && Math.abs(velx-lastVelAveragex)<=0.3)
+            timeLimitToStopx += MyPanel.delta;
+        if (Math.abs(posy-lastPosAveragey)<=0.2 && Math.abs(vely-lastVelAveragey)<=0.3)
+            timeLimitToStopy += MyPanel.delta;
+
+        if (this.focused) {
+            System.out.println(lastPosAveragex);
+            System.out.println(lastPosAveragey);
+            System.out.println(lastVelAveragex);
+            System.out.println(lastVelAveragey + "\n ");
+
+            System.out.println(position);
+            System.out.println(velocity);
+            System.out.println(timeLimitToStopy+"\n");
+        }
     }
 
     public abstract void drawVelTrajectory(Graphics2D g, Color c);

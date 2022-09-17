@@ -1,11 +1,7 @@
 package Canvas;
 
 import MovingPoint.MovingPoint;
-import Vectors.Vector;
 import Vectors.Vector2D;
-
-import java.awt.*;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -59,11 +55,13 @@ public class MyMouseHandler implements MouseListener, MouseMotionListener {
 
     @Override
     public void mouseReleased(MouseEvent mouseEvent) {
-        for (MovingPoint mp : panel.getElements())
-            if (mp.contains(x,y) && mp.isTrajectory) {
+        for (MovingPoint mp : panel.getElements()) {
+            if (mp.contains(x, y) && mp.isTrajectory) {
                 mp.isTrajectory = false;
-                mp.setVelocity(new Vector2D(-7*dx, -7*dy));
+                mp.setVelocity(new Vector2D(-7 * dx, -7 * dy));
+                mp.resetTimeLimit();
             }
+        }
         dx = dy = 0;
     }
 
